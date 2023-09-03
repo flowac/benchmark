@@ -24,7 +24,7 @@ fi
 
 	${CC} -w -c -O3 ${CFLAGS} $0 -o dry1.o || exit 1
 	${CC} -w -DPASS2 -O3 ${CFLAGS} $0 dry1.o ${LFLAGS} -o dry2o3 || exit 1
-	./dry2o3 500000000 2>/dev/null
+	./dry2o3 100000000 2>/dev/null
 	rm -f dry1.o
 
     exit 0
