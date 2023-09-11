@@ -1,0 +1,6 @@
+*~
+*.o
+bonnie*/Makefile
+bonnie*/bonnie++
+bonnie*/config.*
+
