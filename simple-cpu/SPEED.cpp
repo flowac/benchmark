@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <vector>
 
+const int WAIT_SECS = 0;//5;
 const int64_t ITERS = 400000000;
 const int64_t MULTI = 1000000000;
 const double ANCHOR = 10000000;
@@ -17,11 +18,21 @@ const double MAGICF = 999352;
 const int64_t MAGIC = 4225772;
 using namespace std;
 
-double fpu(int64_t len) {
+int64_t truncF(double x) {
+    double y = x / MAGICF;
+    double z = y * MAGICF;
+    return (x - z) * MULTI;
+}
+
+int64_t truncI(int64_t x) {
+    return x % MAGIC;
+}
+
+int64_t fpu(int64_t len) {
     double ret = 0;
     for (int64_t i = 0; i < len; ++i)
         ret += sqrt(i * (double) 3.14159) + sin(i * (float) 0.001);
-    return ret;
+    return truncF(ret);
 }
 
 int64_t ipu(int64_t len) {
@@ -35,28 +46,20 @@ int64_t ipu(int64_t len) {
         ret |= (b >> 1);
         ret &= 0xC0FFEE;
     }
-    return ret;
+    return truncI(ret);
 }
 
-void workerF(int64_t len, double &ret) {
-    ret = fpu(len);
+void workerF(int64_t len, pair<int64_t, chrono::time_point<chrono::system_clock>> &ret) {
+    ret.first = fpu(len);
+    ret.second = chrono::high_resolution_clock::now();
 }
 
-void workerI(int64_t len, int64_t &ret) {
-    ret = ipu(len);
+void workerI(int64_t len, pair<int64_t, chrono::time_point<chrono::system_clock>> &ret) {
+    ret.first = ipu(len);
+    ret.second = chrono::high_resolution_clock::now();
 }
 
-int64_t _truncF(double x) {
-    double y = x / MAGICF;
-    double z = y * MAGICF;
-    return (x - z) * MULTI;
-}
-
-int64_t _truncI(int64_t x) {
-    return x % MAGIC;
-}
-
-void block(int len = 7) {
+void block(int len = WAIT_SECS) {
     while (--len >= 0) {
         cout << ".";
         cout.flush();
@@ -70,14 +73,14 @@ int main() {
     cout << "Single thread ";
     cout.flush();
     auto start1 = chrono::high_resolution_clock::now();
-    double ret1 = fpu(ITERS);
+    auto ret1 = fpu(ITERS);
     auto stop1 = chrono::high_resolution_clock::now();
     auto dur1 = chrono::duration_cast<chrono::microseconds>(stop1 - start1);
-    cout << _truncF(ret1);
+    cout << ret1;
 
     uint16_t NT = thread::hardware_concurrency();
     vector<thread> threads;
-    vector<double> retN(NT);
+    vector<pair<int64_t, chrono::time_point<chrono::system_clock>>> retN(NT);
 
     block();
     cout << endl << "Multi thread";
@@ -86,27 +89,29 @@ int main() {
     for (uint16_t i = 0; i < NT; ++i)
         threads.emplace_back(workerF, ITERS, ref(retN[i]));
     for (auto &t : threads) t.join();
-    auto stopN = chrono::high_resolution_clock::now();
-    auto durN = chrono::duration_cast<chrono::microseconds>(stopN - startN);
-    for (auto r : retN) cout << " " << _truncF(r);
+    int64_t durN = 0;
+    for (auto &r : retN) {
+        cout << " " << r.first;
+        durN += chrono::duration_cast<chrono::microseconds>(r.second - startN).count();
+    }
 
     cout << endl << "=== FPU RESULT ===" << endl;
     cout << "Single: " << dur1.count() / 1000.0 << " ms = " << ANCHOR / dur1.count() << endl;
-    cout << "Multi:  " << durN.count() / 1000.0 << " ms = " << ANCHOR / durN.count() * NT << endl;
-    cout << "Speedup: " << (double) dur1.count() * NT / durN.count() << "x  Threads: " << NT << endl;
+    cout << "Multi:  " << durN / 1000.0 << " ms = " << ANCHOR / durN * NT * NT << endl;
+    cout << "Speedup: " << (double) dur1.count() * NT * NT / durN << "x  Threads: " << NT << endl;
 }{
     block();
     cout << "Single thread ";
     cout.flush();
     auto start1 = chrono::high_resolution_clock::now();
-    double ret1 = ipu(ITERS);
+    auto ret1 = ipu(ITERS);
     auto stop1 = chrono::high_resolution_clock::now();
     auto dur1 = chrono::duration_cast<chrono::microseconds>(stop1 - start1);
-    cout << _truncI(ret1);
+    cout << ret1;
 
     uint16_t NT = thread::hardware_concurrency();
     vector<thread> threads;
-    vector<int64_t> retN(NT);
+    vector<pair<int64_t, chrono::time_point<chrono::system_clock>>> retN(NT);
 
     block();
     cout << endl << "Multi thread";
@@ -115,14 +120,16 @@ int main() {
     for (uint16_t i = 0; i < NT; ++i)
         threads.emplace_back(workerI, ITERS, ref(retN[i]));
     for (auto &t : threads) t.join();
-    auto stopN = chrono::high_resolution_clock::now();
-    auto durN = chrono::duration_cast<chrono::microseconds>(stopN - startN);
-    for (auto r : retN) cout << " " << _truncI(r);
+    int64_t durN = 0;
+    for (auto &r : retN) {
+        cout << " " << r.first;
+        durN += chrono::duration_cast<chrono::microseconds>(r.second - startN).count();
+    }
 
     cout << endl << "=== INT RESULT ===" << endl;
     cout << "Single: " << dur1.count() / 1000.0 << " ms = " << ANCHOR / dur1.count() << endl;
-    cout << "Multi:  " << durN.count() / 1000.0 << " ms = " << ANCHOR / durN.count() * NT << endl;
-    cout << "Speedup: " << (double) dur1.count() * NT / durN.count() << "x  Threads: " << NT << endl;
+    cout << "Multi:  " << durN / 1000.0 << " ms = " << ANCHOR / durN * NT * NT << endl;
+    cout << "Speedup: " << (double) dur1.count() * NT * NT / durN << "x  Threads: " << NT << endl;
 }
     return 0;
 }
