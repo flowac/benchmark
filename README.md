@@ -5,8 +5,19 @@ License is Public Domain unless specified otherwise
 ## Simple CPU Benchmark
 | Model | OS | FPU | Multi | Speedup | INT | Multi | Speedup | Threads |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| MBA M4 | Mac | 13.26 | 68.36 | 5.16 | 5.45 | 39.15 | 7.19 | 10 |
+| MBA M4 | Mac | 13.32 | 69.68 | 5.23 | 5.44 | 37.07 | 6.81 | 10 |
 | Intel i7 13700k | Cygwin | 5.67 | 72.83 | 12.85 | 5.13 | 104.02 | 20.26 | 24 |
+
+=== FPU RESULT ===
+Single: 750.965 ms = 13.3162
+Multi:  14351.2 ms = 69.6807
+Speedup: 5.23278x  Threads: 10
+.....Single thread 0.....
+Multi thread 0 0 0 0 0 0 0 0 0 0
+=== INT RESULT ===
+Single: 1837.17 ms = 5.44317
+Multi:  26975 ms = 37.0713
+Speedup: 6.81061x  Threads: 10
 
 ### Deprecated FPU Only
 | Model | OS | Single | Multi | Speedup | Threads |

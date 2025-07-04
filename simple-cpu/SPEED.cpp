@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <vector>
 
-const int WAIT_SECS = 0;//5;
+const int WAIT_SECS = 5;
 const int64_t ITERS = 400000000;
 const int64_t MULTI = 1000000000;
 const double ANCHOR = 10000000;
@@ -49,12 +49,12 @@ int64_t ipu(int64_t len) {
     return truncI(ret);
 }
 
-void workerF(int64_t len, pair<int64_t, chrono::time_point<chrono::system_clock>> &ret) {
+void workerF(int64_t len, pair<int64_t, chrono::time_point<chrono::steady_clock>> &ret) {
     ret.first = fpu(len);
     ret.second = chrono::high_resolution_clock::now();
 }
 
-void workerI(int64_t len, pair<int64_t, chrono::time_point<chrono::system_clock>> &ret) {
+void workerI(int64_t len, pair<int64_t, chrono::time_point<chrono::steady_clock>> &ret) {
     ret.first = ipu(len);
     ret.second = chrono::high_resolution_clock::now();
 }
@@ -80,7 +80,7 @@ int main() {
 
     uint16_t NT = thread::hardware_concurrency();
     vector<thread> threads;
-    vector<pair<int64_t, chrono::time_point<chrono::system_clock>>> retN(NT);
+    vector<pair<int64_t, chrono::time_point<chrono::steady_clock>>> retN(NT);
 
     block();
     cout << endl << "Multi thread";
@@ -111,7 +111,7 @@ int main() {
 
     uint16_t NT = thread::hardware_concurrency();
     vector<thread> threads;
-    vector<pair<int64_t, chrono::time_point<chrono::system_clock>>> retN(NT);
+    vector<pair<int64_t, chrono::time_point<chrono::steady_clock>>> retN(NT);
 
     block();
     cout << endl << "Multi thread";
