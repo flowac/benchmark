@@ -7,6 +7,7 @@ License is Public Domain unless specified otherwise
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | MBA M4 | Mac | 13.33 | 69.57 | 5.22 | 5.44 | 38.74 | 7.12 | 10 |
 | Intel i7 13700k | Cygwin | 5.67 | 78.40 | 13.83 | 5.13 | 109.40 | 21.33 | 24 |
+| Intel i7 13700k | WSL2 | 6.65 | 72.93 | 10.97 | 5.32 | 111.03 | 20.88 | 24 |
 
 ### Deprecated FPU Only
 | Model | OS | Single | Multi | Speedup | Threads |
