@@ -13,7 +13,8 @@
 const int64_t ITERS = 400000000;
 const int64_t MULTI = 1000000000;
 const double ANCHOR = 10000000;
-const double MAGIC  = 999352;
+const double MAGICF = 999352;
+const int64_t MAGIC = 4225772;
 using namespace std;
 
 double fpu(int64_t len) {
@@ -45,10 +46,14 @@ void workerI(int64_t len, int64_t &ret) {
     ret = ipu(len);
 }
 
-int64_t _trunc(double x) {
-    double y = x / MAGIC;
-    double z = y * MAGIC;
+int64_t _truncF(double x) {
+    double y = x / MAGICF;
+    double z = y * MAGICF;
     return (x - z) * MULTI;
+}
+
+int64_t _truncI(int64_t x) {
+    return x % MAGIC;
 }
 
 void block(int len = 7) {
@@ -68,7 +73,7 @@ int main() {
     double ret1 = fpu(ITERS);
     auto stop1 = chrono::high_resolution_clock::now();
     auto dur1 = chrono::duration_cast<chrono::microseconds>(stop1 - start1);
-    cout << _trunc(ret1);
+    cout << _truncF(ret1);
 
     uint16_t NT = thread::hardware_concurrency();
     vector<thread> threads;
@@ -83,7 +88,7 @@ int main() {
     for (auto &t : threads) t.join();
     auto stopN = chrono::high_resolution_clock::now();
     auto durN = chrono::duration_cast<chrono::microseconds>(stopN - startN);
-    for (auto r : retN) cout << " " << _trunc(r);
+    for (auto r : retN) cout << " " << _truncF(r);
 
     cout << endl << "=== FPU RESULT ===" << endl;
     cout << "Single: " << dur1.count() / 1000.0 << " ms = " << ANCHOR / dur1.count() << endl;
@@ -97,7 +102,7 @@ int main() {
     double ret1 = ipu(ITERS);
     auto stop1 = chrono::high_resolution_clock::now();
     auto dur1 = chrono::duration_cast<chrono::microseconds>(stop1 - start1);
-    cout << _trunc(ret1);
+    cout << _truncI(ret1);
 
     uint16_t NT = thread::hardware_concurrency();
     vector<thread> threads;
@@ -112,7 +117,7 @@ int main() {
     for (auto &t : threads) t.join();
     auto stopN = chrono::high_resolution_clock::now();
     auto durN = chrono::duration_cast<chrono::microseconds>(stopN - startN);
-    for (auto r : retN) cout << " " << _trunc(r);
+    for (auto r : retN) cout << " " << _truncI(r);
 
     cout << endl << "=== INT RESULT ===" << endl;
     cout << "Single: " << dur1.count() / 1000.0 << " ms = " << ANCHOR / dur1.count() << endl;
