@@ -5,7 +5,7 @@ License is Public Domain unless specified otherwise
 ## Simple CPU Benchmark
 | Model | OS | FPU | Multi | Speedup | INT | Multi | Speedup | Threads |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| MBA M4 | Mac | 13.33 | 69.57 | 5.22 | 5.44 | 38.74 | 7.12 | 10 |
+| MBA M4 | Mac | 13.48 | 79.69 | 5.91 | 5.44 | 39.41 | 7.24 | 10 |
 | Intel i7 13700k | WSL2 | 6.64 | 93.60 | 14.09 | 5.53 | 112.78 | 20.40 | 24 |
 | Intel i7 13700k | Cygwin | 5.64 | 89.94 | 15.95 | 5.13 | 106.05 | 20.67 | 24 |
 
