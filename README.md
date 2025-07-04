@@ -5,10 +5,11 @@ License is Public Domain unless specified otherwise
 ## Simple FPU
 | Model | OS | Single | Multi | Speedup | Threads |
 | --- | --- | --- | --- | --- | --- |
-| MBP M4 Pro | Mac | 10.4943 | 105.097 | 10.0147 | 14 |
-| Intel i7 13700k | Cygwin | 3.47788 | 40.9097 | 11.7628 | 24 |
-| AWS c7i | AL2 | 2.0742 | 112.212 | 54.0991 | 96 |
-| AWS c8g | AL2 | 2.99381 | 11.7789 | 3.93442 | 4 |
+| MBP M4 Pro | Mac | 10.49 | 105.10 | 10.01 | 14 |
+| MBA M4 | Mac | 10.30 | 53.80 | 5.22 | 10 |
+| Intel i7 13700k | Cygwin | 3.48 | 40.91 | 11.76 | 24 |
+| AWS c8g | AL2 | 2.99 | 11.78 | 3.93 | 4 |
+| AWS c7i | AL2 | 2.07 | 112.21 | 54.10 | 96 |
 
 
 ## Dhrystone Single Core
