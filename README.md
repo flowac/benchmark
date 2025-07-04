@@ -2,7 +2,12 @@
 Cross platform benchmark tools  
 License is Public Domain unless specified otherwise  
 
-## Simple FPU
+## Simple CPU Benchmark
+| Model | OS | Single | Multi | FPU Speedup | Single | Multi | INT Speedup | Threads |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Intel i7 13700k | Cygwin | 5.67 | 72.83 | 12.85 | 5.13 | 104.02 | 20.26 | 24 |
+
+### Deprecated FPU Only
 | Model | OS | Single | Multi | Speedup | Threads |
 | --- | --- | --- | --- | --- | --- |
 | MBP M4 Pro | Mac | 10.49 | 105.10 | 10.01 | 14 |
