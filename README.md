@@ -5,18 +5,9 @@ License is Public Domain unless specified otherwise
 ## Simple CPU Benchmark
 | Model | OS | FPU | Multi | Speedup | INT | Multi | Speedup | Threads |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| MBA M4 | Mac | 13.48 | 79.69 | 5.91 | 5.44 | 39.41 | 7.24 | 10 |
-| Intel i7 13700k | WSL2 | 6.64 | 93.60 | 14.09 | 5.53 | 112.78 | 20.40 | 24 |
-| Intel i7 13700k | Cygwin | 5.64 | 89.94 | 15.95 | 5.13 | 106.05 | 20.67 | 24 |
-
-### Deprecated FPU Only
-| Model | OS | Single | Multi | Speedup | Threads |
-| --- | --- | --- | --- | --- | --- |
-| MBP M4 Pro | Mac | 10.49 | 105.10 | 10.01 | 14 |
-| MBA M4 | Mac | 10.30 | 53.80 | 5.22 | 10 |
-| Intel i7 13700k | Cygwin | 3.48 | 40.91 | 11.76 | 24 |
-| AWS c8g | AL2 | 2.99 | 11.78 | 3.93 | 4 |
-| AWS c7i | AL2 | 2.07 | 112.21 | 54.10 | 96 |
+| MBA M4 | Mac | - | - | - | - | - | - | 10 |
+| Intel i7 13700k | WSL2 | 2.45 | 25.36 | 10.35 | 2.05 | 43.80 | 21.35 | 24 |
+| Intel i7 13700k | Cygwin | 2.30 | 29.91 | 13.01 | 2.06 | 42.55 | 20.67 | 24 |
 
 
 ## Dhrystone Single Core

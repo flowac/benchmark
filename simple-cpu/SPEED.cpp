@@ -12,78 +12,42 @@
 #include <unistd.h>
 #include <vector>
 
-const int WAIT_SECS = 3;
-const int SUBT = 20000;
-const int64_t ITERS = 400000000;
-const int64_t MULTI = 1000000000;
-const double ANCHOR = 10000000;
-const double MAGICF = 999352;
-const int64_t MAGIC = 4225772;
+const int RUN_SECS  = 4;
+const int WAIT_SECS = 4;
+const double MULTIPLIER = 0.01;
 using namespace std;
-int64_t MTT;
-atomic<int64_t> cntN;
+atomic<bool> DO_RUN;
+const uint16_t NT = thread::hardware_concurrency();
 
-int64_t truncF(double x) {
-    double y = x / MAGICF;
-    double z = y * MAGICF;
-    return (x - z) * MULTI;
-}
+inline int64_t _trunc(double x) {return (((int64_t) x) >> 12) & 34;}
 
-int64_t truncI(int64_t x) {
-    return x % MAGIC;
-}
-
-int64_t fpu(int64_t len) {
-    double ret = 0;
-    for (int64_t i = 0; i < len; ++i)
-        ret += sqrt(i * (double) 3.14159) + sin(i * (float) 0.001);
-    return truncF(ret);
-}
-
-int64_t ipu(int64_t len) {
-    volatile int32_t a = 123, b = 456, c = 7890123;
-    int64_t ret = 0;
-    for (int64_t i = 0; i < len; ++i) {
-        ret += a + b;
-        ret -= b - c;
-        ret *= (a + 42);
-        ret %= c;
-        ret |= (b >> 1);
-        ret &= 0xC0FFEE;
+void run_float(int64_t &ret, int64_t &cnt) {
+    int64_t _cnt = 0;
+    double  _ret = 0;
+    while (DO_RUN) {
+        _ret += sqrt(_cnt * (double) 3.14159) + sin(_cnt * (float) 0.001);
+        ++_cnt;
     }
-    return truncI(ret);
+    ret = _trunc(_ret);
+    cnt = _cnt;
 }
 
-void workerF(int64_t &val) {
-    int cnt = 0;
-    double ret = 0;
-    while (cntN < MTT) {
-        ret += sqrt(cnt * (double) 3.14159) + sin(cnt * (float) 0.001);
-        if (++cnt >= SUBT) {
-            cntN += SUBT;
-            cnt = 0;
-        }
+void run_int(int64_t &ret, int64_t &cnt) {
+    volatile int32_t a = 123, b = 456;
+    volatile int64_t c = 7890123;
+    int64_t _cnt = 0;
+    int64_t _ret = 0;
+    while (DO_RUN) {
+        _ret += a + b;
+        _ret -= b - c;
+        _ret *= (a + 42);
+        _ret %= c;
+        _ret |= (b >> 1);
+        _ret &= 0xC0FFEE;
+        ++_cnt;
     }
-    val = truncF(ret);
-}
-
-void workerI(int64_t &val) {
-    volatile int32_t a = 123, b = 456, c = 7890123;
-    int cnt = 0;
-    int64_t ret = 0;
-    while (cntN < MTT) {
-        ret += a + b;
-        ret -= b - c;
-        ret *= (a + 42);
-        ret %= c;
-        ret |= (b >> 1);
-        ret &= 0xC0FFEE;
-        if (++cnt >= SUBT) {
-            cntN += SUBT;
-            cnt = 0;
-        }
-    }
-    val = truncI(ret);
+    ret = _trunc(_ret);
+    cnt = _cnt;
 }
 
 void block(int len = WAIT_SECS) {
@@ -94,72 +58,38 @@ void block(int len = WAIT_SECS) {
     }
 }
 
-int main() {
-    uint16_t NT = thread::hardware_concurrency();
-    MTT = ITERS * static_cast<int64_t>(NT);
-{
+double exec1(uint16_t nproc, void (*run)(int64_t &, int64_t &)) {
+    vector<thread> thd;
+    vector<int64_t> ret(nproc), cnt(nproc);
+
     block();
-    cout << "Single thread ";
-    cout.flush();
-    auto start1 = chrono::high_resolution_clock::now();
-    auto ret1 = fpu(ITERS);
-    auto stop1 = chrono::high_resolution_clock::now();
-    auto dur1 = chrono::duration_cast<chrono::microseconds>(stop1 - start1).count();
-    cout << ret1;
-
-    vector<thread> threads;
-    vector<int64_t> retN(NT);
-    cntN = 0;
-    block();
-    cout << "Multi thread ";
-    cout.flush();
-
-    auto startN = chrono::high_resolution_clock::now();
-    for (uint16_t i = 0; i < NT; ++i)
-        threads.emplace_back(workerF, ref(retN[i]));
-    for (auto &t : threads) t.join();
-    auto stopN = chrono::high_resolution_clock::now();
-    auto durN = chrono::duration_cast<chrono::microseconds>(stopN - startN).count();
-    int64_t retMT = 0;
-    for (auto r : retN) retMT += r;
-    cout << retMT << endl;
-
-    cout << "=== FLOATING POINT RESULT ===" << endl;
-    cout << "Single: " << dur1 / 1000.0 << " ms = " << ANCHOR / dur1 << endl;
-    cout << "Multi:  " << durN / 1000.0 << " ms = " << ANCHOR / durN * NT << endl;
-    cout << "Speedup: " << (double) dur1 * NT / durN << "x  Threads: " << NT << endl;
-}{
-    block();
-    cout << "Single thread ";
-    cout.flush();
-    auto start1 = chrono::high_resolution_clock::now();
-    auto ret1 = ipu(ITERS);
-    auto stop1 = chrono::high_resolution_clock::now();
-    auto dur1 = chrono::duration_cast<chrono::microseconds>(stop1 - start1).count();
-    cout << ret1;
-
-    vector<thread> threads;
-    vector<int64_t> retN(NT);
-    cntN = 0;
-    block();
-    cout << "Multi thread ";
-    cout.flush();
-
-    auto startN = chrono::high_resolution_clock::now();
-    for (uint16_t i = 0; i < NT; ++i)
-        threads.emplace_back(workerI, ref(retN[i]));
-    for (auto &t : threads) t.join();
-    auto stopN = chrono::high_resolution_clock::now();
-    auto durN = chrono::duration_cast<chrono::microseconds>(stopN - startN).count();
-    int64_t retMT = 0;
-    for (auto r : retN) retMT += r;
-    cout << retMT << endl;
-
-    cout << "=== INTEGER RESULT ===" << endl;
-    cout << "Single: " << dur1 / 1000.0 << " ms = " << ANCHOR / dur1 << endl;
-    cout << "Multi:  " << durN / 1000.0 << " ms = " << ANCHOR / durN * NT << endl;
-    cout << "Speedup: " << (double) dur1 * NT / durN << "x  Threads: " << NT << endl;
+    cout << nproc << " thread" << endl;
+    DO_RUN = true;
+    auto start = chrono::high_resolution_clock::now();
+    for (uint16_t i = 0; i < nproc; ++i)
+        thd.emplace_back(run, ref(ret[i]), ref(cnt[i]));
+    sleep(RUN_SECS);
+    DO_RUN = false;
+    for (auto &t : thd) t.join();
+    auto stop = chrono::high_resolution_clock::now();
+    auto dur = chrono::duration_cast<chrono::microseconds>(stop - start).count();
+    int64_t sum = 0, cntSum = 0;
+    for (auto r : ret) sum += r;
+    for (auto c : cnt) cntSum += c;
+    (void) sum;
+    return MULTIPLIER * cntSum / dur;
 }
-    return 0;
+
+int64_t exec2(const char *type, void (*run)(int64_t &, int64_t &)) {
+    cout << type;
+    double score1 = exec1(1, run);
+    double scoreN = exec1(NT, run);
+    cout << "=== " << type << " RESULT ===" << endl;
+    cout << "Single Thread: " << score1 << endl;
+    cout << "Multi  Thread: " << scoreN << endl;
+    cout << "Speedup: " << scoreN / score1 << "x  Threads: " << NT << endl;
+    return score1;
 }
+
+int main() {return exec2("FLOAT", &run_float) + exec2("INT", &run_int);}
 
