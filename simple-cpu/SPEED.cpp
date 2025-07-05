@@ -19,8 +19,6 @@ using namespace std;
 atomic<bool> DO_RUN;
 const uint16_t NT = thread::hardware_concurrency();
 
-inline int64_t _trunc(double x) {return (((int64_t) x) >> 12) & 34;}
-
 void run_float(int64_t &ret, int64_t &cnt) {
     int64_t _cnt = 0;
     double  _ret = 0;
@@ -28,7 +26,7 @@ void run_float(int64_t &ret, int64_t &cnt) {
         _ret += sqrt(_cnt * (double) 3.14159) + sin(_cnt * (float) 0.001);
         ++_cnt;
     }
-    ret = _trunc(_ret);
+    ret = _ret;
     cnt = _cnt;
 }
 
@@ -46,7 +44,7 @@ void run_int(int64_t &ret, int64_t &cnt) {
         _ret &= 0xC0FFEE;
         ++_cnt;
     }
-    ret = _trunc(_ret);
+    ret = _ret;
     cnt = _cnt;
 }
 
