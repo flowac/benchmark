@@ -8,11 +8,12 @@
 	set -x
 	sARCH=$(uname -i)
 	if [[ $sARCH == riscv64 ]]; then
-		CFLAGS+=" -march=rv64imafdczbb_zba -mcpu=sifive-u74 -mtune=sifive-7-series -pipe -fomit-frame-pointer --param l1-cache-size=32 --param l2-cache-size=2048"
+		CFLAGS=" -march=rv64imafdczbb_zba -mcpu=sifive-u74 -mtune=sifive-7-series -pipe -fomit-frame-pointer --param l1-cache-size=32 --param l2-cache-size=2048"
 	else
-		CFLAGS+=" -march=native -mtune=native"
+		CFLAGS=" -march=native -mtune=native"
 	fi
 
+if [ -z $CC ]; then CC=gcc; fi
 if false; then
 	${CC} -c ${CFLAGS} $0 -o dry1.o || exit 1
 	${CC} -DPASS2 ${CFLAGS} $0 dry1.o ${LFLAGS} -o dry2 || exit 1
