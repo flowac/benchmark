@@ -8,9 +8,9 @@
 	set -x
 	sARCH=$(uname -i)
 	if [[ $sARCH == riscv64 ]]; then
-		CFLAGS=" -march=rv64imafdczbb_zba -mcpu=sifive-u74 -mtune=sifive-7-series -pipe -fomit-frame-pointer --param l1-cache-size=32 --param l2-cache-size=2048"
+		CFLAGS=" -std=c89 -march=rv64imafdczbb_zba -mcpu=sifive-u74 -mtune=sifive-7-series -pipe -fomit-frame-pointer --param l1-cache-size=32 --param l2-cache-size=2048"
 	else
-		CFLAGS=" -march=native -mtune=native"
+		CFLAGS=" -std=c89 -march=native -mtune=native"
 	fi
 
 if [ -z $CC ]; then CC=gcc; fi
@@ -460,6 +460,12 @@ struct tms      time_info;
         /* for boolean and enumeration types in Ada, Pascal */
 
 /* General definitions: */
+
+#ifdef __APPLE__
+#ifndef HZ
+#define HZ 60
+#endif
+#endif
 
 #include <stdio.h>
                 /* for strcpy, strcmp */

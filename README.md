@@ -13,9 +13,10 @@ License is Public Domain unless specified otherwise
 
 ## Dhrystone Single Core
 ``i7 13700k:  53887 MIPS``  
+``MBA M4:     41443 MIPS``  
 ``Pi 5:       20400 MIPS``  
-``PBP RK3399: 9696 MIPS``  
-``Star64 U74: 3303 MIPS``  
+``PBP RK3399:  9696 MIPS``  
+``Star64 U74:  3303 MIPS``  
 
 ## Bonnie (Block R/W Per Second) (bonnie++ -b -f -s 2000M)
 ``ASUS Z790M-Plus FireCuda 530: 1.4 G / 3.9 G``  
